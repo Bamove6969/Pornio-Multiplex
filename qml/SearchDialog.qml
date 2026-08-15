@@ -20,21 +20,35 @@ Dialog {
     property string activeSource: "backend" // "backend", "cinemeta", "direct"
 
     background: Rectangle {
-        color: "#14141c"
-        radius: 12
-        border.color: "#282836"
+        color: "#12121a"
+        radius: 14
+        border.color: "#28283a"
         border.width: 1
     }
 
     header: Rectangle {
-        height: 54
-        color: "#1c1c28"
-        radius: 12
+        height: 56
+        color: "#181824"
+        radius: 14
 
         RowLayout {
             anchors.fill: parent
-            anchors.margins: 10
+            anchors.margins: 12
             spacing: 10
+
+            Rectangle {
+                width: 32; height: 32
+                radius: 8
+                color: "#7B68EE"
+
+                Text {
+                    anchors.centerIn: parent
+                    text: (root.targetSlot + 1).toString()
+                    color: "white"
+                    font.bold: true
+                    font.pixelSize: 14
+                }
+            }
 
             Text {
                 text: root.showingStreams 
@@ -47,7 +61,7 @@ Dialog {
                 elide: Text.ElideRight
             }
 
-            Button {
+            StyledButton {
                 text: root.showingStreams ? "← Back to Catalog" : "✕ Close"
                 onClicked: (mouse) => {
                     if (root.showingStreams) {
@@ -62,7 +76,7 @@ Dialog {
     }
 
     contentItem: ColumnLayout {
-        spacing: 10
+        spacing: 12
 
         // Source Switcher Tabs
         RowLayout {
@@ -70,27 +84,27 @@ Dialog {
             visible: !root.showingStreams
             spacing: 8
 
-            Button {
+            StyledButton {
                 text: "⚡ Your Backend (RD + Jackett)"
-                highlighted: root.activeSource === "backend"
+                activePill: root.activeSource === "backend"
                 onClicked: (mouse) => {
                     root.activeSource = "backend"
                     loadBackendCatalog()
                 }
             }
 
-            Button {
+            StyledButton {
                 text: "🎬 Cinemeta (IMDb/TMDB)"
-                highlighted: root.activeSource === "cinemeta"
+                activePill: root.activeSource === "cinemeta"
                 onClicked: (mouse) => {
                     root.activeSource = "cinemeta"
                     root.searchResults = []
                 }
             }
 
-            Button {
+            StyledButton {
                 text: "🔗 Direct URL / Presets"
-                highlighted: root.activeSource === "direct"
+                activePill: root.activeSource === "direct"
                 onClicked: (mouse) => {
                     root.activeSource = "direct"
                 }
@@ -108,10 +122,13 @@ Dialog {
                 Layout.fillWidth: true
                 placeholderText: root.activeSource === "backend" ? "Search your Torrent Stream backend..." : "Search Cinemeta (e.g. Inception, Avatar...)"
                 color: "white"
+                padding: 10
+                font.pixelSize: 13
                 background: Rectangle {
-                    color: "#0e0e13"
+                    color: "#0a0a0f"
                     radius: 8
-                    border.color: searchInput.activeFocus ? "#7B68EE" : "#2a2a36"
+                    border.color: searchInput.activeFocus ? "#7B68EE" : "#282838"
+                    border.width: 1
                 }
                 onAccepted: executeSearch()
             }
@@ -129,19 +146,19 @@ Dialog {
                     verticalAlignment: Text.AlignVCenter
                 }
                 background: Rectangle {
-                    color: "#0e0e13"
+                    color: "#0a0a0f"
                     radius: 8
-                    border.color: "#2a2a36"
+                    border.color: "#282838"
                 }
             }
 
-            Button {
-                text: "Search"
-                highlighted: true
+            StyledButton {
+                text: "🔍 Search"
+                primary: true
                 onClicked: (mouse) => { executeSearch() }
             }
 
-            Button {
+            StyledButton {
                 text: "↻ Refresh"
                 visible: root.activeSource === "backend"
                 onClicked: (mouse) => { loadBackendCatalog() }
@@ -163,16 +180,17 @@ Dialog {
                     Layout.fillWidth: true
                     placeholderText: "Paste direct video link / stream URL (http://...)"
                     color: "white"
+                    padding: 10
                     background: Rectangle {
-                        color: "#0e0e13"
+                        color: "#0a0a0f"
                         radius: 8
-                        border.color: "#2a2a36"
+                        border.color: "#282838"
                     }
                 }
 
-                Button {
+                StyledButton {
                     text: "Load URL"
-                    highlighted: true
+                    primary: true
                     onClicked: (mouse) => {
                         if (directUrlInput.text.trim().length > 0) {
                             QuadController.loadStream(root.targetSlot, "Direct URL", "", directUrlInput.text.trim())
@@ -184,36 +202,37 @@ Dialog {
 
             Text {
                 text: "Quick Presets (1-Click Test Feeds):"
-                color: "#888"
+                color: "#8e8ea0"
                 font.pixelSize: 12
+                font.bold: true
             }
 
             RowLayout {
                 Layout.fillWidth: true
                 spacing: 8
 
-                Button {
+                StyledButton {
                     text: "Big Buck Bunny"
                     onClicked: (mouse) => {
                         QuadController.loadStream(root.targetSlot, "Big Buck Bunny", "", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4")
                         root.close()
                     }
                 }
-                Button {
+                StyledButton {
                     text: "Elephant's Dream"
                     onClicked: (mouse) => {
                         QuadController.loadStream(root.targetSlot, "Elephant's Dream", "", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4")
                         root.close()
                     }
                 }
-                Button {
+                StyledButton {
                     text: "Tears of Steel"
                     onClicked: (mouse) => {
                         QuadController.loadStream(root.targetSlot, "Tears of Steel", "", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4")
                         root.close()
                     }
                 }
-                Button {
+                StyledButton {
                     text: "Sintel"
                     onClicked: (mouse) => {
                         QuadController.loadStream(root.targetSlot, "Sintel", "", "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4")
@@ -235,9 +254,11 @@ Dialog {
             delegate: Rectangle {
                 id: itemCard
                 width: searchListView.width
-                height: 72
-                color: itemMouse.containsMouse ? "#242432" : "#171720"
-                radius: 8
+                height: 74
+                color: itemMouse.containsMouse ? "#20202e" : "#14141e"
+                radius: 10
+                border.color: itemMouse.containsMouse ? "#3a3a52" : "#1f1f2c"
+                border.width: 1
 
                 MouseArea {
                     id: itemMouse
@@ -252,14 +273,14 @@ Dialog {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: 8
+                        anchors.margins: 10
                         spacing: 12
 
                         Rectangle {
-                            Layout.preferredWidth: 44
+                            Layout.preferredWidth: 46
                             Layout.preferredHeight: 56
-                            color: "#20202c"
-                            radius: 4
+                            color: "#1e1e2c"
+                            radius: 6
 
                             Image {
                                 id: posterImg
@@ -281,7 +302,7 @@ Dialog {
 
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 2
+                            spacing: 3
 
                             Text {
                                 text: modelData.name || modelData.title || "Untitled"
@@ -303,9 +324,9 @@ Dialog {
                             }
                         }
 
-                        Button {
+                        StyledButton {
                             text: "Streams →"
-                            highlighted: true
+                            primary: true
                             onClicked: (mouse) => {
                                 root.selectedMeta = modelData
                                 fetchStreams(modelData.type || "movie", modelData.id)
@@ -316,7 +337,7 @@ Dialog {
             }
         }
 
-        // Streams Loading / Resolving View
+        // Streams Loading View
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -360,10 +381,10 @@ Dialog {
                     font.pixelSize: 14
                 }
 
-                Button {
+                StyledButton {
                     Layout.alignment: Qt.AlignHCenter
                     text: "← Back to Catalog"
-                    highlighted: true
+                    primary: true
                     onClicked: (mouse) => {
                         root.showingStreams = false
                     }
@@ -383,10 +404,10 @@ Dialog {
             delegate: Rectangle {
                 id: streamCard
                 width: streamsListView.width
-                height: 68
-                color: streamMouseArea.containsMouse ? "#28283c" : "#171722"
-                radius: 8
-                border.color: streamMouseArea.containsMouse ? "#7B68EE" : "#242434"
+                height: 70
+                color: streamMouseArea.containsMouse ? "#242436" : "#14141e"
+                radius: 10
+                border.color: streamMouseArea.containsMouse ? "#7B68EE" : "#20202e"
                 border.width: 1
 
                 MouseArea {
@@ -401,7 +422,7 @@ Dialog {
 
                     RowLayout {
                         anchors.fill: parent
-                        anchors.margins: 10
+                        anchors.margins: 12
                         spacing: 12
 
                         ColumnLayout {
@@ -427,9 +448,9 @@ Dialog {
                             }
                         }
 
-                        Button {
+                        StyledButton {
                             text: "▶ Play on Slot " + (root.targetSlot + 1)
-                            highlighted: true
+                            success: true
                             onClicked: (mouse) => {
                                 playStream(modelData)
                             }
@@ -469,7 +490,6 @@ Dialog {
         root.isLoadingStreams = true
         root.streamResults = []
 
-        // Resolve streams via background worker / Qt
         var results = QuadController.resolveStreams(addonUrl, itemType, id)
         root.streamResults = results
         root.isLoadingStreams = false
