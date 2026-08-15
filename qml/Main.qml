@@ -28,15 +28,15 @@ Window {
             }
         }
 
-        // Top Control Bar (Slides down from top edge on hover in Maximum mode)
+        // Top Control Bar (Frosted glass overlay, slides down from top edge on hover in Maximum mode)
         Rectangle {
             id: topBar
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 48
-            color: Qt.rgba(14/255, 14/255, 20/255, 0.95)
-            border.color: "#1e1e28"
+            height: 52
+            color: Qt.rgba(13/255, 13/255, 19/255, 0.94)
+            border.color: "#222232"
             border.width: 1
             z: 100
 
@@ -53,63 +53,96 @@ Window {
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: 8
+                anchors.margins: 10
                 spacing: 10
 
-                Text {
-                    text: "PORNIO-MULTIPLEX"
+                // App Brand Badge
+                Rectangle {
+                    width: 32; height: 32
+                    radius: 8
                     color: "#7B68EE"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: "4X"
+                        color: "white"
+                        font.bold: true
+                        font.pixelSize: 13
+                    }
+                }
+
+                Text {
+                    text: "PORNIO MULTIPLEX"
+                    color: "white"
                     font.bold: true
                     font.pixelSize: 14
                 }
 
                 Rectangle {
-                    width: 1; height: 20; color: "#2d2d3c"
+                    width: 1; height: 22; color: "#2d2d3e"
                 }
 
-                Text {
-                    text: "Audio: Slot " + (QuadController.activeAudioSlot + 1) + " (Keys: 1, 2, 3, 4)"
-                    color: "#a0a0b8"
-                    font.pixelSize: 12
+                // Live Audio Focus Tag
+                Rectangle {
+                    height: 26
+                    width: audioFocusText.implicitWidth + 20
+                    radius: 6
+                    color: "#1c1c28"
+                    border.color: "#7B68EE"
+                    border.width: 1
+
+                    Text {
+                        id: audioFocusText
+                        anchors.centerIn: parent
+                        text: "🔊 Audio: Slot " + (QuadController.activeAudioSlot + 1)
+                        color: "#9D8FFF"
+                        font.pixelSize: 11
+                        font.bold: true
+                    }
                 }
 
                 Item { Layout.fillWidth: true }
 
-                Button {
+                // Slot Audio Selectors
+                StyledButton {
                     text: "Slot 1"
-                    highlighted: QuadController.activeAudioSlot === 0
+                    activePill: QuadController.activeAudioSlot === 0
                     onClicked: (mouse) => { QuadController.activeAudioSlot = 0 }
                 }
-                Button {
+                StyledButton {
                     text: "Slot 2"
-                    highlighted: QuadController.activeAudioSlot === 1
+                    activePill: QuadController.activeAudioSlot === 1
                     onClicked: (mouse) => { QuadController.activeAudioSlot = 1 }
                 }
-                Button {
+                StyledButton {
                     text: "Slot 3"
-                    highlighted: QuadController.activeAudioSlot === 2
+                    activePill: QuadController.activeAudioSlot === 2
                     onClicked: (mouse) => { QuadController.activeAudioSlot = 2 }
                 }
-                Button {
+                StyledButton {
                     text: "Slot 4"
-                    highlighted: QuadController.activeAudioSlot === 3
+                    activePill: QuadController.activeAudioSlot === 3
                     onClicked: (mouse) => { QuadController.activeAudioSlot = 3 }
                 }
 
-                Button {
-                    text: "Play/Pause (Space)"
+                Rectangle {
+                    width: 1; height: 22; color: "#2d2d3e"
+                }
+
+                StyledButton {
+                    text: "❚❚ Play/Pause (Space)"
                     onClicked: (mouse) => { QuadController.togglePlayPauseAll() }
                 }
 
-                Button {
-                    text: mainWindow.isMaximumMode ? "🗗 Standard (M)" : "⚡ Maximum View (M)"
-                    highlighted: mainWindow.isMaximumMode
+                StyledButton {
+                    text: mainWindow.isMaximumMode ? "🗗 Standard View (M)" : "⚡ Maximum View (M)"
+                    primary: !mainWindow.isMaximumMode
                     onClicked: (mouse) => {
                         toggleMaximumMode()
                     }
                 }
 
-                Button {
+                StyledButton {
                     text: mainWindow.visibility === Window.FullScreen ? "🗗 Windowed" : "🗖 Fullscreen (F11)"
                     onClicked: (mouse) => {
                         mainWindow.visibility = (mainWindow.visibility === Window.FullScreen) ? Window.Windowed : Window.FullScreen

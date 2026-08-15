@@ -69,8 +69,8 @@ Rectangle {
 
             Rectangle {
                 Layout.alignment: Qt.AlignHCenter
-                width: 56; height: 56
-                radius: 28
+                width: 60; height: 60
+                radius: 30
                 color: hoverArea.containsMouse ? "#28283a" : "#1a1a24"
                 border.color: hoverArea.containsMouse ? "#7B68EE" : "#2f2f3e"
                 border.width: 1
@@ -80,7 +80,7 @@ Rectangle {
                     text: (root.slotIndex + 1).toString()
                     color: "#7B68EE"
                     font.bold: true
-                    font.pixelSize: 22
+                    font.pixelSize: 24
                 }
             }
 
@@ -92,10 +92,11 @@ Rectangle {
                 font.bold: true
             }
 
-            Button {
+            StyledButton {
                 Layout.alignment: Qt.AlignHCenter
                 text: "+ Load Stream / Search"
-                highlighted: true
+                primary: true
+                customRadius: 10
                 onClicked: (mouse) => { root.requestOpenSearch(root.slotIndex) }
             }
         }
@@ -132,8 +133,10 @@ Rectangle {
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 44
-            color: Qt.rgba(10/255, 10/255, 15/255, 0.8)
+            height: 48
+            color: Qt.rgba(12/255, 12/255, 18/255, 0.88)
+            border.color: "#222230"
+            border.width: 1
             visible: (hoverArea.containsMouse || root.isAudioActive) && root.streamUrl !== "" && !root.isMaximumMode
 
             RowLayout {
@@ -144,7 +147,7 @@ Rectangle {
                 Rectangle {
                     width: 28; height: 28
                     radius: 14
-                    color: root.isAudioActive ? "#7B68EE" : "#303040"
+                    color: root.isAudioActive ? "#7B68EE" : "#2a2a3a"
 
                     Text {
                         anchors.centerIn: parent
@@ -157,8 +160,8 @@ Rectangle {
 
                 Rectangle {
                     visible: root.isAudioActive
-                    width: 60; height: 22
-                    radius: 4
+                    width: 66; height: 24
+                    radius: 6
                     color: "#7B68EE"
 
                     Text {
@@ -179,14 +182,15 @@ Rectangle {
                     elide: Text.ElideRight
                 }
 
-                Button {
+                StyledButton {
                     text: "Change"
                     visible: root.streamUrl !== ""
                     onClicked: (mouse) => { root.requestOpenSearch(root.slotIndex) }
                 }
 
-                Button {
+                StyledButton {
                     text: root.isSolo ? "🗗 2x2" : "🗖 Solo"
+                    primary: !root.isSolo
                     onClicked: (mouse) => { QuadController.soloSlot = root.isSolo ? -1 : root.slotIndex }
                 }
             }
@@ -197,23 +201,26 @@ Rectangle {
             anchors.bottom: parent.bottom
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 48
-            color: Qt.rgba(10/255, 10/255, 15/255, 0.85)
+            height: 52
+            color: Qt.rgba(12/255, 12/255, 18/255, 0.90)
+            border.color: "#222230"
+            border.width: 1
             visible: hoverArea.containsMouse && root.streamUrl !== ""
 
             RowLayout {
                 anchors.fill: parent
-                anchors.margins: 6
-                spacing: 8
+                anchors.margins: 8
+                spacing: 10
 
-                Button {
-                    text: (playerLoader.item && playerLoader.item.isPaused) ? "▶" : "❚❚"
+                StyledButton {
+                    text: (playerLoader.item && playerLoader.item.isPaused) ? "▶ Play" : "❚❚ Pause"
+                    customRadius: 8
                     onClicked: (mouse) => {
                         if (playerLoader.item) playerLoader.item.togglePause()
                     }
                 }
 
-                Slider {
+                StyledSlider {
                     id: scrubSlider
                     Layout.fillWidth: true
                     from: 0
@@ -226,12 +233,14 @@ Rectangle {
 
                 Text {
                     text: formatTime(playerLoader.item ? playerLoader.item.position : 0) + " / " + formatTime(playerLoader.item ? playerLoader.item.duration : 0)
-                    color: "#aaa"
+                    color: "#a0a0b8"
                     font.pixelSize: 11
+                    font.bold: true
                 }
 
-                Button {
-                    text: root.isAudioActive ? "🔊" : "🔇"
+                StyledButton {
+                    text: root.isAudioActive ? "🔊 Active" : "🔇 Mute"
+                    activePill: root.isAudioActive
                     onClicked: (mouse) => { QuadController.activeAudioSlot = root.slotIndex }
                 }
             }
