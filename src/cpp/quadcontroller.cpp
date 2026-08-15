@@ -3,6 +3,8 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QFile>
+#include <QDateTime>
+#include <QCoreApplication>
 #include <QDebug>
 
 // FFI Declarations matching Rust core
@@ -29,6 +31,7 @@ QuadController::QuadController(QObject *parent)
     
     m_coreHandle = stremio_quad_create();
     updateFromRustState();
+    loadHistoryFromFile();
 }
 
 QuadController::~QuadController() {
@@ -54,6 +57,10 @@ QString QuadController::defaultAddonUrl() const {
     return m_defaultAddonUrl;
 }
 
+QVariantList QuadController::historyList() const {
+    return m_historyList;
+}
+
 void QuadController::setDefaultAddonUrl(const QString &url) {
     if (m_defaultAddonUrl != url) {
         m_defaultAddonUrl = url;
@@ -72,6 +79,10 @@ void QuadController::loadStream(int slotIdx, const QString &title, const QString
         poster.toUtf8().constData()
     );
     updateFromRustState();
+
+    if (!streamUrl.isEmpty()) {
+        addToHistory(title, poster, streamUrl);
+    }
 }
 
 void QuadController::setActiveAudioSlot(int slotIdx) {
@@ -96,6 +107,73 @@ void QuadController::setSoloSlot(int slotIdx) {
 void QuadController::togglePlayPauseAll() {
     m_allPaused = !m_allPaused;
     emit playPauseAllRequested(m_allPaused);
+}
+
+void QuadController::loadHistoryFromFile() {
+    QString path = QCoreApplication::applicationDirPath() + "/history.json";
+    QFile file(path);
+    if (file.open(QIODevice::ReadOnly)) {
+        QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+        if (doc.isArray()) {
+            QVariantList list;
+            QJsonArray arr = doc.array();
+            for (const QJsonValue &val : arr) {
+                list.append(val.toObject().toVariantMap());
+            }
+            m_historyList = list;
+            emit historyListChanged();
+        }
+    }
+}
+
+void QuadController::saveHistoryToFile() {
+    QString path = QCoreApplication::applicationDirPath() + "/history.json";
+    QFile file(path);
+    if (file.open(QIODevice::WriteOnly)) {
+        QJsonArray arr;
+        for (const QVariant &val : m_historyList) {
+            arr.append(QJsonObject::fromVariantMap(val.toMap()));
+        }
+        file.write(QJsonDocument(arr).toJson(QJsonDocument::Compact));
+    }
+}
+
+void QuadController::addToHistory(const QString &title, const QString &poster, const QString &streamUrl) {
+    if (streamUrl.isEmpty()) return;
+
+    QString cleanTitle = title.isEmpty() ? "Stream" : title;
+
+    // Deduplicate existing entry
+    for (int i = 0; i < m_historyList.size(); ++i) {
+        QVariantMap item = m_historyList[i].toMap();
+        if (item.value("streamUrl").toString() == streamUrl || 
+            (item.value("title").toString() == cleanTitle && !cleanTitle.isEmpty())) {
+            m_historyList.removeAt(i);
+            break;
+        }
+    }
+
+    QVariantMap newItem;
+    newItem["title"] = cleanTitle;
+    newItem["poster"] = poster;
+    newItem["streamUrl"] = streamUrl;
+    newItem["timestamp"] = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm");
+
+    m_historyList.prepend(newItem);
+
+    // Limit history to 30 most recent items
+    while (m_historyList.size() > 30) {
+        m_historyList.removeLast();
+    }
+
+    saveHistoryToFile();
+    emit historyListChanged();
+}
+
+void QuadController::clearHistory() {
+    m_historyList.clear();
+    saveHistoryToFile();
+    emit historyListChanged();
 }
 
 QVariantList QuadController::fetchCatalog(const QString &addonUrl, const QString &catalogType, const QString &catalogId, const QString &searchQuery) {
