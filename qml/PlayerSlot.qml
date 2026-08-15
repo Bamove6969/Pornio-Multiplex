@@ -103,112 +103,15 @@ Rectangle {
                     onClicked: (mouse) => { root.requestOpenSearch(root.slotIndex) }
                 }
 
-                Item {
-                    Layout.preferredWidth: emptyHistBtn.implicitWidth
-                    Layout.preferredHeight: emptyHistBtn.implicitHeight
-
-                    StyledButton {
-                        id: emptyHistBtn
-                        anchors.fill: parent
-                        text: "History ▾"
-                        customRadius: 8
-                        onClicked: (mouse) => { emptyHistoryMenu.open() }
-                    }
-
-                    // Browser-Style History Dropdown Menu on Empty Slot
-                    Popup {
-                        id: emptyHistoryMenu
-                        y: parent.height + 4
-                        x: -80
-                        width: 280
-                        padding: 4
-                        modal: false
-                        focus: true
-                        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-
-                        background: Rectangle {
-                            color: "#14141e"
-                            radius: 8
-                            border.color: "#2e2e42"
-                            border.width: 1
-                        }
-
-                        contentItem: ColumnLayout {
-                            spacing: 2
-
-                            Text {
-                                visible: !QuadController.historyList || QuadController.historyList.length === 0
-                                text: "No watched history yet"
-                                color: "#707085"
-                                font.pixelSize: 11
-                                padding: 8
-                            }
-
-                            ListView {
-                                id: emptyHistList
-                                Layout.preferredWidth: 272
-                                Layout.preferredHeight: Math.min(260, count * 32)
-                                clip: true
-                                model: QuadController.historyList
-                                visible: count > 0
-
-                                delegate: Rectangle {
-                                    width: emptyHistList.width
-                                    height: 32
-                                    radius: 4
-                                    color: emptyHistItemMouse.containsMouse ? "#26263a" : "transparent"
-
-                                    MouseArea {
-                                        id: emptyHistItemMouse
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            QuadController.loadStream(root.slotIndex, modelData.title || "Stream", modelData.poster || "", modelData.streamUrl || "")
-                                            emptyHistoryMenu.close()
-                                        }
-
-                                        RowLayout {
-                                            anchors.fill: parent
-                                            anchors.leftMargin: 8
-                                            anchors.rightMargin: 8
-                                            spacing: 8
-
-                                            Rectangle {
-                                                Layout.preferredWidth: 16
-                                                Layout.preferredHeight: 20
-                                                radius: 2
-                                                color: "#222232"
-
-                                                Image {
-                                                    id: miniPoster1
-                                                    anchors.fill: parent
-                                                    source: modelData.poster || ""
-                                                    asynchronous: true
-                                                    fillMode: Image.PreserveAspectCrop
-                                                    visible: status === Image.Ready && source !== ""
-                                                }
-
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    text: "🎬"
-                                                    font.pixelSize: 9
-                                                    visible: miniPoster1.status !== Image.Ready
-                                                }
-                                            }
-
-                                            Text {
-                                                text: modelData.title || "Untitled"
-                                                color: emptyHistItemMouse.containsMouse ? "#ffffff" : "#d0d0e0"
-                                                font.pixelSize: 12
-                                                Layout.fillWidth: true
-                                                elide: Text.ElideRight
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                StyledButton {
+                    id: emptyHistBtn
+                    text: "History ▾"
+                    customRadius: 8
+                    onClicked: (mouse) => {
+                        var pt = emptyHistBtn.mapToItem(null, 0, emptyHistBtn.height + 4)
+                        historyDropdown.x = Math.max(10, pt.x - 80)
+                        historyDropdown.y = pt.y
+                        historyDropdown.open()
                     }
                 }
             }
@@ -295,112 +198,15 @@ Rectangle {
                     elide: Text.ElideRight
                 }
 
-                Item {
-                    Layout.preferredWidth: activeHistBtn.implicitWidth
-                    Layout.preferredHeight: activeHistBtn.implicitHeight
-
-                    StyledButton {
-                        id: activeHistBtn
-                        anchors.fill: parent
-                        text: "History ▾"
-                        customRadius: 8
-                        onClicked: (mouse) => { activeHistoryMenu.open() }
-                    }
-
-                    // Browser-Style History Dropdown Menu on Active Slot
-                    Popup {
-                        id: activeHistoryMenu
-                        y: parent.height + 4
-                        x: -120
-                        width: 280
-                        padding: 4
-                        modal: false
-                        focus: true
-                        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
-
-                        background: Rectangle {
-                            color: "#14141e"
-                            radius: 8
-                            border.color: "#2e2e42"
-                            border.width: 1
-                        }
-
-                        contentItem: ColumnLayout {
-                            spacing: 2
-
-                            Text {
-                                visible: !QuadController.historyList || QuadController.historyList.length === 0
-                                text: "No watched history yet"
-                                color: "#707085"
-                                font.pixelSize: 11
-                                padding: 8
-                            }
-
-                            ListView {
-                                id: activeHistList
-                                Layout.preferredWidth: 272
-                                Layout.preferredHeight: Math.min(260, count * 32)
-                                clip: true
-                                model: QuadController.historyList
-                                visible: count > 0
-
-                                delegate: Rectangle {
-                                    width: activeHistList.width
-                                    height: 32
-                                    radius: 4
-                                    color: activeHistItemMouse.containsMouse ? "#26263a" : "transparent"
-
-                                    MouseArea {
-                                        id: activeHistItemMouse
-                                        anchors.fill: parent
-                                        hoverEnabled: true
-                                        cursorShape: Qt.PointingHandCursor
-                                        onClicked: {
-                                            QuadController.loadStream(root.slotIndex, modelData.title || "Stream", modelData.poster || "", modelData.streamUrl || "")
-                                            activeHistoryMenu.close()
-                                        }
-
-                                        RowLayout {
-                                            anchors.fill: parent
-                                            anchors.leftMargin: 8
-                                            anchors.rightMargin: 8
-                                            spacing: 8
-
-                                            Rectangle {
-                                                Layout.preferredWidth: 16
-                                                Layout.preferredHeight: 20
-                                                radius: 2
-                                                color: "#222232"
-
-                                                Image {
-                                                    id: miniPoster2
-                                                    anchors.fill: parent
-                                                    source: modelData.poster || ""
-                                                    asynchronous: true
-                                                    fillMode: Image.PreserveAspectCrop
-                                                    visible: status === Image.Ready && source !== ""
-                                                }
-
-                                                Text {
-                                                    anchors.centerIn: parent
-                                                    text: "🎬"
-                                                    font.pixelSize: 9
-                                                    visible: miniPoster2.status !== Image.Ready
-                                                }
-                                            }
-
-                                            Text {
-                                                text: modelData.title || "Untitled"
-                                                color: activeHistItemMouse.containsMouse ? "#ffffff" : "#d0d0e0"
-                                                font.pixelSize: 12
-                                                Layout.fillWidth: true
-                                                elide: Text.ElideRight
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                StyledButton {
+                    id: activeHistBtn
+                    text: "History ▾"
+                    customRadius: 8
+                    onClicked: (mouse) => {
+                        var pt = activeHistBtn.mapToItem(null, 0, activeHistBtn.height + 4)
+                        historyDropdown.x = Math.max(10, pt.x - 120)
+                        historyDropdown.y = pt.y
+                        historyDropdown.open()
                     }
                 }
 
@@ -464,6 +270,106 @@ Rectangle {
                     text: root.isAudioActive ? "🔊 Active" : "🔇 Mute"
                     activePill: root.isAudioActive
                     onClicked: (mouse) => { QuadController.activeAudioSlot = root.slotIndex }
+                }
+            }
+        }
+    }
+
+    // Top-Level Overlay History Dropdown (Clean, Browser-Style List)
+    Popup {
+        id: historyDropdown
+        parent: Overlay.overlay
+        width: 300
+        padding: 4
+        modal: false
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+
+        background: Rectangle {
+            color: "#14141e"
+            radius: 8
+            border.color: "#2f2f42"
+            border.width: 1
+        }
+
+        contentItem: ColumnLayout {
+            spacing: 2
+
+            Text {
+                visible: !QuadController.historyList || QuadController.historyList.length === 0
+                text: "No watched history yet"
+                color: "#707085"
+                font.pixelSize: 11
+                padding: 8
+            }
+
+            ListView {
+                id: histListView
+                Layout.preferredWidth: 292
+                Layout.preferredHeight: Math.min(260, count * 34)
+                clip: true
+                model: QuadController.historyList
+                visible: count > 0
+
+                delegate: Rectangle {
+                    width: histListView.width
+                    height: 34
+                    radius: 4
+                    color: histItemMouse.containsMouse ? "#26263a" : "transparent"
+
+                    MouseArea {
+                        id: histItemMouse
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: {
+                            QuadController.loadStream(
+                                root.slotIndex,
+                                modelData.title || "Stream",
+                                modelData.poster || "",
+                                modelData.streamUrl || ""
+                            )
+                            historyDropdown.close()
+                        }
+
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 8
+                            anchors.rightMargin: 8
+                            spacing: 8
+
+                            Rectangle {
+                                Layout.preferredWidth: 16
+                                Layout.preferredHeight: 22
+                                radius: 2
+                                color: "#222232"
+
+                                Image {
+                                    id: miniPoster
+                                    anchors.fill: parent
+                                    source: modelData.poster || ""
+                                    asynchronous: true
+                                    fillMode: Image.PreserveAspectCrop
+                                    visible: status === Image.Ready && source !== ""
+                                }
+
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "🎬"
+                                    font.pixelSize: 9
+                                    visible: miniPoster.status !== Image.Ready
+                                }
+                            }
+
+                            Text {
+                                text: modelData.title || "Untitled"
+                                color: histItemMouse.containsMouse ? "#ffffff" : "#d0d0e0"
+                                font.pixelSize: 12
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                            }
+                        }
+                    }
                 }
             }
         }
