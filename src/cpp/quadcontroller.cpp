@@ -5,6 +5,8 @@
 #include <QFile>
 #include <QDateTime>
 #include <QCoreApplication>
+#include <QStandardPaths>
+#include <QDir>
 #include <QDebug>
 
 // FFI Declarations matching Rust core
@@ -19,6 +21,17 @@ extern "C" {
     char *stremio_quad_search(void *handle, const char *query, const char *item_type);
     char *stremio_quad_resolve_streams(void *handle, const char *addon_url, const char *item_type, const char *id);
     void stremio_quad_free_string(char *s);
+}
+
+static QString getHistoryFilePath() {
+    QString appData = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    QDir().mkpath(appData);
+    QString appDataFile = appData + "/history.json";
+    QString localFile = QCoreApplication::applicationDirPath() + "/history.json";
+    
+    if (QFile::exists(appDataFile)) return appDataFile;
+    if (QFile::exists(localFile)) return localFile;
+    return appDataFile;
 }
 
 QuadController::QuadController(QObject *parent)
@@ -81,6 +94,7 @@ void QuadController::loadStream(int slotIdx, const QString &title, const QString
     updateFromRustState();
 
     if (!streamUrl.isEmpty()) {
+        // Record only actual played streams into collective history
         addToHistory(title, poster, streamUrl);
     }
 }
@@ -110,7 +124,7 @@ void QuadController::togglePlayPauseAll() {
 }
 
 void QuadController::loadHistoryFromFile() {
-    QString path = QCoreApplication::applicationDirPath() + "/history.json";
+    QString path = getHistoryFilePath();
     QFile file(path);
     if (file.open(QIODevice::ReadOnly)) {
         QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
@@ -127,7 +141,7 @@ void QuadController::loadHistoryFromFile() {
 }
 
 void QuadController::saveHistoryToFile() {
-    QString path = QCoreApplication::applicationDirPath() + "/history.json";
+    QString path = getHistoryFilePath();
     QFile file(path);
     if (file.open(QIODevice::WriteOnly)) {
         QJsonArray arr;
@@ -157,12 +171,12 @@ void QuadController::addToHistory(const QString &title, const QString &poster, c
     newItem["title"] = cleanTitle;
     newItem["poster"] = poster;
     newItem["streamUrl"] = streamUrl;
-    newItem["timestamp"] = QDateTime::currentDateTime().toString("yyyy-MM-dd HH:mm");
+    newItem["timestamp"] = QDateTime::currentDateTime().toString("MMM d, h:mm AP");
 
     m_historyList.prepend(newItem);
 
-    // Limit history to 30 most recent items
-    while (m_historyList.size() > 30) {
+    // Keep 50 most recent watched streams
+    while (m_historyList.size() > 50) {
         m_historyList.removeLast();
     }
 

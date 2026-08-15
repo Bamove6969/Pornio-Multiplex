@@ -56,7 +56,7 @@ Rectangle {
         z: 2
     }
 
-    // Empty State (When no stream is loaded)
+    // Empty State (Initial screen when no stream is loaded)
     Rectangle {
         anchors.fill: parent
         color: (hoverArea.containsMouse && root.streamUrl === "") ? "#161622" : "#0d0d12"
@@ -65,12 +65,12 @@ Rectangle {
 
         ColumnLayout {
             anchors.centerIn: parent
-            spacing: 12
+            spacing: 14
 
             Rectangle {
                 Layout.alignment: Qt.AlignHCenter
-                width: 60; height: 60
-                radius: 30
+                width: 64; height: 64
+                radius: 32
                 color: hoverArea.containsMouse ? "#28283a" : "#1a1a24"
                 border.color: hoverArea.containsMouse ? "#7B68EE" : "#2f2f3e"
                 border.width: 1
@@ -80,32 +80,31 @@ Rectangle {
                     text: (root.slotIndex + 1).toString()
                     color: "#7B68EE"
                     font.bold: true
-                    font.pixelSize: 24
+                    font.pixelSize: 26
                 }
             }
 
             Text {
                 Layout.alignment: Qt.AlignHCenter
-                text: "Slot " + (root.slotIndex + 1) + " (Empty)"
+                text: "Slot " + (root.slotIndex + 1)
                 color: hoverArea.containsMouse ? "#ffffff" : "#8e8ea0"
-                font.pixelSize: 15
+                font.pixelSize: 16
                 font.bold: true
             }
 
             RowLayout {
                 Layout.alignment: Qt.AlignHCenter
-                spacing: 8
+                spacing: 10
 
                 StyledButton {
-                    text: "+ Load Stream / Search"
+                    text: "+ Search Movies"
                     primary: true
                     customRadius: 10
                     onClicked: (mouse) => { root.requestOpenSearch(root.slotIndex) }
                 }
 
                 StyledButton {
-                    text: "🕒 History ▾"
-                    visible: QuadController.historyList && QuadController.historyList.length > 0
+                    text: "🕒 Watched History ▾"
                     customRadius: 10
                     onClicked: (mouse) => { historyPopup.open() }
                 }
@@ -263,36 +262,50 @@ Rectangle {
         }
     }
 
-    // Collective Shared Playback History Popup
+    // Collective Shared Watched Movies History Dropdown
     Popup {
         id: historyPopup
-        width: Math.min(360, root.width - 20)
-        height: Math.min(320, root.height - 20)
-        x: Math.max(10, Math.min(root.width - width - 10, (root.width - width) / 2))
-        y: Math.max(10, Math.min(root.height - height - 10, (root.height - height) / 2))
+        width: Math.min(380, root.width - 24)
+        height: Math.min(360, root.height - 24)
+        x: Math.max(12, Math.min(root.width - width - 12, (root.width - width) / 2))
+        y: Math.max(12, Math.min(root.height - height - 12, (root.height - height) / 2))
         modal: true
         focus: true
 
         background: Rectangle {
-            color: "#13131c"
-            radius: 12
-            border.color: "#2e2e42"
+            color: "#13131d"
+            radius: 14
+            border.color: "#2f2f45"
             border.width: 1
         }
 
         contentItem: ColumnLayout {
-            spacing: 8
+            spacing: 10
 
             // Header
             RowLayout {
                 Layout.fillWidth: true
                 Layout.margins: 4
 
+                Rectangle {
+                    width: 24; height: 24
+                    radius: 6
+                    color: "#7B68EE"
+
+                    Text {
+                        anchors.centerIn: parent
+                        text: (root.slotIndex + 1).toString()
+                        color: "white"
+                        font.bold: true
+                        font.pixelSize: 12
+                    }
+                }
+
                 Text {
-                    text: "🕒 Recent Playback History"
+                    text: "Quick Play on Slot " + (root.slotIndex + 1)
                     color: "white"
                     font.bold: true
-                    font.pixelSize: 13
+                    font.pixelSize: 14
                     Layout.fillWidth: true
                 }
 
@@ -306,18 +319,48 @@ Rectangle {
             Rectangle {
                 Layout.fillWidth: true
                 height: 1
-                color: "#222230"
+                color: "#222232"
             }
 
-            // Empty History State
-            Text {
+            // Empty History Message
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
                 visible: !QuadController.historyList || QuadController.historyList.length === 0
-                text: "No recent history yet.\nPlay a stream to record it here!"
-                color: "#8e8ea0"
-                font.pixelSize: 12
-                horizontalAlignment: Text.AlignHCenter
-                Layout.alignment: Qt.AlignHCenter
-                Layout.margins: 20
+                color: "transparent"
+
+                ColumnLayout {
+                    anchors.centerIn: parent
+                    spacing: 10
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "🎬 No Watched Movies Yet"
+                        color: "white"
+                        font.bold: true
+                        font.pixelSize: 14
+                    }
+
+                    Text {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "Play any movie from search once, and it will be saved here so you can instantly auto-play it anytime!"
+                        color: "#8e8ea0"
+                        font.pixelSize: 12
+                        wrapMode: Text.WordWrap
+                        horizontalAlignment: Text.AlignHCenter
+                        Layout.preferredWidth: 260
+                    }
+
+                    StyledButton {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: "+ Search Movies Now"
+                        primary: true
+                        onClicked: (mouse) => {
+                            historyPopup.close()
+                            root.requestOpenSearch(root.slotIndex)
+                        }
+                    }
+                }
             }
 
             // History Items List
@@ -326,14 +369,15 @@ Rectangle {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 clip: true
+                visible: QuadController.historyList && QuadController.historyList.length > 0
                 model: QuadController.historyList
 
                 delegate: Rectangle {
                     width: historyListView.width
-                    height: 52
+                    height: 56
                     radius: 8
-                    color: historyItemMouse.containsMouse ? "#242436" : "#181824"
-                    border.color: historyItemMouse.containsMouse ? "#7B68EE" : "#1f1f2c"
+                    color: historyItemMouse.containsMouse ? "#242438" : "#181826"
+                    border.color: historyItemMouse.containsMouse ? "#7B68EE" : "#1f1f2e"
                     border.width: 1
 
                     MouseArea {
@@ -358,10 +402,10 @@ Rectangle {
                             spacing: 10
 
                             Rectangle {
-                                Layout.preferredWidth: 32
-                                Layout.preferredHeight: 36
+                                Layout.preferredWidth: 34
+                                Layout.preferredHeight: 40
                                 radius: 4
-                                color: "#222232"
+                                color: "#242436"
 
                                 Image {
                                     id: histImg
@@ -375,7 +419,7 @@ Rectangle {
                                 Text {
                                     anchors.centerIn: parent
                                     text: "🎬"
-                                    font.pixelSize: 14
+                                    font.pixelSize: 16
                                     visible: histImg.status !== Image.Ready
                                 }
                             }
@@ -394,17 +438,25 @@ Rectangle {
                                 }
 
                                 Text {
-                                    text: modelData.timestamp || "Recently Played"
+                                    text: modelData.timestamp ? ("Watched " + modelData.timestamp) : "Recently Watched"
                                     color: "#8e8ea0"
                                     font.pixelSize: 10
                                 }
                             }
 
-                            Text {
+                            StyledButton {
                                 text: "▶ Play"
-                                color: "#00E676"
-                                font.bold: true
-                                font.pixelSize: 11
+                                success: true
+                                customRadius: 6
+                                onClicked: (mouse) => {
+                                    QuadController.loadStream(
+                                        root.slotIndex,
+                                        modelData.title || "Stream",
+                                        modelData.poster || "",
+                                        modelData.streamUrl || ""
+                                    )
+                                    historyPopup.close()
+                                }
                             }
                         }
                     }
@@ -414,7 +466,7 @@ Rectangle {
             // Bottom Clear Button
             StyledButton {
                 Layout.fillWidth: true
-                text: "🗑 Clear History"
+                text: "🗑 Clear Watched History"
                 visible: QuadController.historyList && QuadController.historyList.length > 0
                 customRadius: 8
                 onClicked: (mouse) => {
