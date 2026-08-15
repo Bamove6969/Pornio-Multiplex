@@ -58,21 +58,34 @@ Rectangle {
 
     // Empty State (Initial screen when no stream is loaded)
     Rectangle {
+        id: emptyStateRect
         anchors.fill: parent
-        color: (hoverArea.containsMouse && root.streamUrl === "") ? "#14141f" : "#0d0d12"
+        color: emptyMouse.containsMouse ? "#14141f" : "#0d0d12"
         visible: root.streamUrl === ""
         Behavior on color { ColorAnimation { duration: 150 } }
+
+        MouseArea {
+            id: emptyMouse
+            anchors.fill: parent
+            hoverEnabled: true
+            cursorShape: Qt.PointingHandCursor
+            acceptedButtons: Qt.LeftButton
+            onClicked: (mouse) => {
+                root.requestOpenSearch(root.slotIndex)
+            }
+        }
 
         ColumnLayout {
             anchors.centerIn: parent
             spacing: 12
+            z: 10
 
             Rectangle {
                 Layout.alignment: Qt.AlignHCenter
                 width: 56; height: 56
                 radius: 28
-                color: hoverArea.containsMouse ? "#28283a" : "#1a1a24"
-                border.color: hoverArea.containsMouse ? "#7B68EE" : "#2f2f3e"
+                color: emptyMouse.containsMouse ? "#28283a" : "#1a1a24"
+                border.color: emptyMouse.containsMouse ? "#7B68EE" : "#2f2f3e"
                 border.width: 1
 
                 Text {
@@ -87,7 +100,7 @@ Rectangle {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 text: "Slot " + (root.slotIndex + 1)
-                color: hoverArea.containsMouse ? "#ffffff" : "#8e8ea0"
+                color: emptyMouse.containsMouse ? "#ffffff" : "#8e8ea0"
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -100,7 +113,9 @@ Rectangle {
                     text: "+ Search"
                     primary: true
                     customRadius: 8
-                    onClicked: (mouse) => { root.requestOpenSearch(root.slotIndex) }
+                    onClicked: (mouse) => { 
+                        root.requestOpenSearch(root.slotIndex) 
+                    }
                 }
 
                 StyledButton {
@@ -118,30 +133,23 @@ Rectangle {
         }
     }
 
-    // Hoverable Interactive Overlay
+    // Hoverable Interactive Overlay for Active Video Slots
     MouseArea {
         id: hoverArea
         anchors.fill: parent
         hoverEnabled: true
-        cursorShape: (root.streamUrl === "") ? Qt.PointingHandCursor : Qt.ArrowCursor
+        enabled: root.streamUrl !== ""
+        visible: root.streamUrl !== ""
         acceptedButtons: Qt.LeftButton | Qt.RightButton
 
         onClicked: (mouse) => {
-            if (root.streamUrl === "") {
-                root.requestOpenSearch(root.slotIndex)
-            } else {
-                if (mouse.button === Qt.LeftButton) {
-                    QuadController.activeAudioSlot = root.slotIndex
-                }
+            if (mouse.button === Qt.LeftButton) {
+                QuadController.activeAudioSlot = root.slotIndex
             }
         }
 
         onDoubleClicked: (mouse) => {
-            if (root.streamUrl !== "") {
-                QuadController.soloSlot = (QuadController.soloSlot === root.slotIndex) ? -1 : root.slotIndex
-            } else {
-                root.requestOpenSearch(root.slotIndex)
-            }
+            QuadController.soloSlot = (QuadController.soloSlot === root.slotIndex) ? -1 : root.slotIndex
         }
 
         // Top Status Header
@@ -153,7 +161,7 @@ Rectangle {
             color: Qt.rgba(12/255, 12/255, 18/255, 0.88)
             border.color: "#222230"
             border.width: 1
-            visible: (hoverArea.containsMouse || root.isAudioActive) && root.streamUrl !== "" && !root.isMaximumMode
+            visible: (hoverArea.containsMouse || root.isAudioActive) && !root.isMaximumMode
 
             RowLayout {
                 anchors.fill: parent
@@ -212,7 +220,6 @@ Rectangle {
 
                 StyledButton {
                     text: "Change"
-                    visible: root.streamUrl !== ""
                     onClicked: (mouse) => { root.requestOpenSearch(root.slotIndex) }
                 }
 
@@ -233,7 +240,7 @@ Rectangle {
             color: Qt.rgba(12/255, 12/255, 18/255, 0.90)
             border.color: "#222230"
             border.width: 1
-            visible: hoverArea.containsMouse && root.streamUrl !== ""
+            visible: hoverArea.containsMouse
 
             RowLayout {
                 anchors.fill: parent
