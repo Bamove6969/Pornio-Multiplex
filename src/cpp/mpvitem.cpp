@@ -93,15 +93,17 @@ MpvItem::MpvItem(QQuickItem *parent)
       m_volume(100.0f),
       m_position(0.0),
       m_duration(0.0),
-      m_isPaused(false) {
+      m_isPaused(false),
+      m_fillMode(true) {
     
     m_mpv = mpv_create();
     if (m_mpv) {
-        // Robust multi-stream hardware decode & network configuration
+        // Multi-stream hardware decode & edge-to-edge fill configuration
         mpv_set_option_string(m_mpv, "hwdec", "auto-safe");
         mpv_set_option_string(m_mpv, "vo", "libmpv");
         mpv_set_option_string(m_mpv, "keep-open", "yes");
         mpv_set_option_string(m_mpv, "idle", "yes");
+        mpv_set_option_string(m_mpv, "panscan", "1.0"); // Default edge-to-edge fill
         mpv_set_option_string(m_mpv, "demuxer-lavf-o", "tls_verify=0");
         mpv_set_option_string(m_mpv, "user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36");
         mpv_set_property_string(m_mpv, "mute", "yes");
@@ -153,6 +155,13 @@ void MpvItem::onMpvEvents() {
             }
         }
     }
+}
+
+void MpvItem::setFillMode(bool fill) {
+    if (m_fillMode == fill || !m_mpv) return;
+    m_fillMode = fill;
+    mpv_set_option_string(m_mpv, "panscan", fill ? "1.0" : "0.0");
+    emit fillModeChanged();
 }
 
 void MpvItem::setSource(const QString &url) {

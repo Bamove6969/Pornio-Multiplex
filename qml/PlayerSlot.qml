@@ -5,12 +5,13 @@ import StremioMultiview 1.0
 
 Rectangle {
     id: root
-    color: "#0c0c10"
-    border.color: isAudioActive ? "#7B68EE" : "#1e1e28"
-    border.width: isMaximumMode ? (isAudioActive ? 1 : 0) : (isAudioActive ? 2 : 1)
+    color: "#000000"
+    border.color: isAudioActive ? "#7B68EE" : "transparent"
+    border.width: isMaximumMode ? 0 : (isAudioActive ? 2 : 0)
 
     property int slotIndex: 0
     property bool isMaximumMode: false
+    property bool fillMode: true
     property var slotData: ({})
     property bool isAudioActive: QuadController.activeAudioSlot === slotIndex
     property bool isSolo: QuadController.soloSlot === slotIndex
@@ -42,6 +43,7 @@ Rectangle {
                 anchors.fill: parent
                 source: root.streamUrl
                 muted: !root.isAudioActive
+                fillMode: root.fillMode
             }
         }
     }
@@ -57,7 +59,7 @@ Rectangle {
     // Empty State (When no stream is loaded)
     Rectangle {
         anchors.fill: parent
-        color: (hoverArea.containsMouse && root.streamUrl === "") ? "#161622" : "#101016"
+        color: (hoverArea.containsMouse && root.streamUrl === "") ? "#161622" : "#0d0d12"
         visible: root.streamUrl === ""
         Behavior on color { ColorAnimation { duration: 150 } }
 
@@ -69,7 +71,7 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
                 width: 56; height: 56
                 radius: 28
-                color: hoverArea.containsMouse ? "#28283a" : "#1d1d28"
+                color: hoverArea.containsMouse ? "#28283a" : "#1a1a24"
                 border.color: hoverArea.containsMouse ? "#7B68EE" : "#2f2f3e"
                 border.width: 1
 
@@ -109,7 +111,6 @@ Rectangle {
 
         onClicked: (mouse) => {
             if (root.streamUrl === "") {
-                // When empty, clicking anywhere on the quadrant opens the stream picker!
                 root.requestOpenSearch(root.slotIndex)
             } else {
                 if (mouse.button === Qt.LeftButton) {
@@ -133,7 +134,7 @@ Rectangle {
             anchors.right: parent.right
             height: 44
             color: Qt.rgba(10/255, 10/255, 15/255, 0.8)
-            visible: (hoverArea.containsMouse || root.isAudioActive) && root.streamUrl !== ""
+            visible: (hoverArea.containsMouse || root.isAudioActive) && root.streamUrl !== "" && !root.isMaximumMode
 
             RowLayout {
                 anchors.fill: parent

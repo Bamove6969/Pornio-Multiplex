@@ -13,6 +13,7 @@ class MpvItem : public QQuickFramebufferObject {
     Q_PROPERTY(double position READ position NOTIFY positionChanged)
     Q_PROPERTY(double duration READ duration NOTIFY durationChanged)
     Q_PROPERTY(bool isPaused READ isPaused NOTIFY isPausedChanged)
+    Q_PROPERTY(bool fillMode READ fillMode WRITE setFillMode NOTIFY fillModeChanged)
 
 public:
     explicit MpvItem(QQuickItem *parent = nullptr);
@@ -33,6 +34,9 @@ public:
     double duration() const { return m_duration; }
     bool isPaused() const { return m_isPaused; }
 
+    bool fillMode() const { return m_fillMode; }
+    void setFillMode(bool fill);
+
     Q_INVOKABLE void play();
     Q_INVOKABLE void pause();
     Q_INVOKABLE void togglePause();
@@ -46,6 +50,7 @@ signals:
     void positionChanged();
     void durationChanged();
     void isPausedChanged();
+    void fillModeChanged();
 
 private:
     void onMpvEvents();
@@ -57,6 +62,7 @@ private:
     double m_position;
     double m_duration;
     bool m_isPaused;
+    bool m_fillMode;
 
     friend class MpvItemRenderer;
 };
