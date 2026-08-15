@@ -57,8 +57,9 @@ Rectangle {
     // Empty State (When no stream is loaded)
     Rectangle {
         anchors.fill: parent
-        color: "#121218"
+        color: (hoverArea.containsMouse && root.streamUrl === "") ? "#161622" : "#101016"
         visible: root.streamUrl === ""
+        Behavior on color { ColorAnimation { duration: 150 } }
 
         ColumnLayout {
             anchors.centerIn: parent
@@ -68,8 +69,9 @@ Rectangle {
                 Layout.alignment: Qt.AlignHCenter
                 width: 56; height: 56
                 radius: 28
-                color: "#1d1d28"
-                border.color: "#2f2f3e"
+                color: hoverArea.containsMouse ? "#28283a" : "#1d1d28"
+                border.color: hoverArea.containsMouse ? "#7B68EE" : "#2f2f3e"
+                border.width: 1
 
                 Text {
                     anchors.centerIn: parent
@@ -83,7 +85,7 @@ Rectangle {
             Text {
                 Layout.alignment: Qt.AlignHCenter
                 text: "Slot " + (root.slotIndex + 1) + " (Empty)"
-                color: "#8e8ea0"
+                color: hoverArea.containsMouse ? "#ffffff" : "#8e8ea0"
                 font.pixelSize: 15
                 font.bold: true
             }
@@ -102,14 +104,26 @@ Rectangle {
         id: hoverArea
         anchors.fill: parent
         hoverEnabled: true
+        cursorShape: (root.streamUrl === "") ? Qt.PointingHandCursor : Qt.ArrowCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
+
         onClicked: (mouse) => {
-            if (mouse.button === Qt.LeftButton) {
-                QuadController.activeAudioSlot = root.slotIndex
+            if (root.streamUrl === "") {
+                // When empty, clicking anywhere on the quadrant opens the stream picker!
+                root.requestOpenSearch(root.slotIndex)
+            } else {
+                if (mouse.button === Qt.LeftButton) {
+                    QuadController.activeAudioSlot = root.slotIndex
+                }
             }
         }
+
         onDoubleClicked: (mouse) => {
-            QuadController.soloSlot = (QuadController.soloSlot === root.slotIndex) ? -1 : root.slotIndex
+            if (root.streamUrl !== "") {
+                QuadController.soloSlot = (QuadController.soloSlot === root.slotIndex) ? -1 : root.slotIndex
+            } else {
+                root.requestOpenSearch(root.slotIndex)
+            }
         }
 
         // Top Status Header
@@ -119,7 +133,7 @@ Rectangle {
             anchors.right: parent.right
             height: 44
             color: Qt.rgba(10/255, 10/255, 15/255, 0.8)
-            visible: hoverArea.containsMouse || root.isAudioActive
+            visible: (hoverArea.containsMouse || root.isAudioActive) && root.streamUrl !== ""
 
             RowLayout {
                 anchors.fill: parent
