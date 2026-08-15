@@ -3,6 +3,7 @@ import QtQuick.Layouts 1.15
 
 Item {
     id: root
+    property bool isMaximumMode: false
 
     signal requestOpenSearch(int slot)
 
@@ -10,8 +11,8 @@ Item {
         anchors.fill: parent
         columns: 2
         rows: 2
-        columnSpacing: 2
-        rowSpacing: 2
+        columnSpacing: 0
+        rowSpacing: 0
 
         Repeater {
             model: 4
@@ -19,6 +20,7 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 slotIndex: index
+                isMaximumMode: root.isMaximumMode
                 slotData: (QuadController.slotList && QuadController.slotList.length > index) ? QuadController.slotList[index] : null
                 visible: (QuadController.soloSlot === -1) || (QuadController.soloSlot === index)
                 onRequestOpenSearch: (slot) => {
