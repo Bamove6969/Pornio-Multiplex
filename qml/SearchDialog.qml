@@ -52,8 +52,8 @@ Dialog {
 
             Text {
                 text: root.showingStreams 
-                    ? ("Available Streams: " + (root.selectedMeta ? (root.selectedMeta.name || root.selectedMeta.title || "") : "")) 
-                    : ("Select Content for Slot " + (targetSlot + 1))
+                    ? ("Alternative Streams: " + (root.selectedMeta ? (root.selectedMeta.name || root.selectedMeta.title || "") : "")) 
+                    : ("Select Movie for Slot " + (targetSlot + 1))
                 color: "white"
                 font.bold: true
                 font.pixelSize: 15
@@ -62,7 +62,7 @@ Dialog {
             }
 
             StyledButton {
-                text: root.showingStreams ? "← Back to Catalog" : "✕ Close"
+                text: root.showingStreams ? "← Back to Search" : "✕ Close"
                 onClicked: (mouse) => {
                     if (root.showingStreams) {
                         root.showingStreams = false
@@ -189,8 +189,8 @@ Dialog {
                 }
 
                 StyledButton {
-                    text: "Load URL"
-                    primary: true
+                    text: "▶ Play on Slot " + (root.targetSlot + 1)
+                    success: true
                     onClicked: (mouse) => {
                         if (directUrlInput.text.trim().length > 0) {
                             QuadController.loadStream(root.targetSlot, "Direct URL", "", directUrlInput.text.trim())
@@ -242,7 +242,7 @@ Dialog {
             }
         }
 
-        // Catalog Results List View
+        // Direct 1-Click Search Results List View
         ListView {
             id: searchListView
             Layout.fillWidth: true
@@ -257,7 +257,7 @@ Dialog {
                 height: 74
                 color: itemMouse.containsMouse ? "#20202e" : "#14141e"
                 radius: 10
-                border.color: itemMouse.containsMouse ? "#3a3a52" : "#1f1f2c"
+                border.color: itemMouse.containsMouse ? "#7B68EE" : "#1f1f2c"
                 border.width: 1
 
                 MouseArea {
@@ -267,8 +267,7 @@ Dialog {
                     cursorShape: Qt.PointingHandCursor
                     acceptedButtons: Qt.LeftButton
                     onClicked: (mouse) => {
-                        root.selectedMeta = modelData
-                        fetchStreams(modelData.type || "movie", modelData.id)
+                        autoPlayItem(modelData)
                     }
 
                     RowLayout {
@@ -325,11 +324,11 @@ Dialog {
                         }
 
                         StyledButton {
-                            text: "Streams →"
-                            primary: true
+                            text: "▶ Play on Slot " + (root.targetSlot + 1)
+                            success: true
+                            customRadius: 8
                             onClicked: (mouse) => {
-                                root.selectedMeta = modelData
-                                fetchStreams(modelData.type || "movie", modelData.id)
+                                autoPlayItem(modelData)
                             }
                         }
                     }
@@ -337,7 +336,7 @@ Dialog {
             }
         }
 
-        // Streams Loading View
+        // Resolving Stream Loading View
         Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -355,7 +354,7 @@ Dialog {
 
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "Resolving Real-Debrid streams from your backend..."
+                    text: "Resolving Real-Debrid high-speed stream..."
                     color: "white"
                     font.pixelSize: 14
                     font.bold: true
@@ -376,14 +375,14 @@ Dialog {
 
                 Text {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "No direct streams found for this item."
+                    text: "No active stream found for this item."
                     color: "#a0a0b0"
                     font.pixelSize: 14
                 }
 
                 StyledButton {
                     Layout.alignment: Qt.AlignHCenter
-                    text: "← Back to Catalog"
+                    text: "← Back to Search"
                     primary: true
                     onClicked: (mouse) => {
                         root.showingStreams = false
@@ -392,7 +391,7 @@ Dialog {
             }
         }
 
-        // Stream Selection List View
+        // Alternative Streams List View (Fallback only if manual stream selection is needed)
         ListView {
             id: streamsListView
             Layout.fillWidth: true
@@ -417,7 +416,7 @@ Dialog {
                     cursorShape: Qt.PointingHandCursor
                     acceptedButtons: Qt.LeftButton
                     onClicked: (mouse) => {
-                        playStream(modelData)
+                        playDirectStream(modelData)
                     }
 
                     RowLayout {
@@ -452,7 +451,7 @@ Dialog {
                             text: "▶ Play on Slot " + (root.targetSlot + 1)
                             success: true
                             onClicked: (mouse) => {
-                                playStream(modelData)
+                                playDirectStream(modelData)
                             }
                         }
                     }
@@ -484,18 +483,36 @@ Dialog {
         }
     }
 
-    function fetchStreams(itemType, id) {
+    function autoPlayItem(meta) {
         var addonUrl = (root.activeSource === "backend") ? QuadController.defaultAddonUrl : "https://torrentio.strem.fun"
-        root.showingStreams = true
-        root.isLoadingStreams = true
-        root.streamResults = []
+        var itemType = meta.type || "movie"
+        var id = meta.id
 
-        var results = QuadController.resolveStreams(addonUrl, itemType, id)
-        root.streamResults = results
-        root.isLoadingStreams = false
+        // 1-Click Auto-Resolve: Fetch top stream and play immediately
+        var streams = QuadController.resolveStreams(addonUrl, itemType, id)
+        if (streams && streams.length > 0) {
+            var topStream = streams[0]
+            var streamUrl = topStream.url || ""
+            if (!streamUrl && topStream.infoHash) {
+                streamUrl = "http://127.0.0.1:11470/" + topStream.infoHash + "/" + (topStream.fileIdx || 0)
+            }
+            QuadController.loadStream(
+                root.targetSlot,
+                meta.name || meta.title || topStream.title || "Stream",
+                meta.poster || "",
+                streamUrl
+            )
+            root.close()
+        } else {
+            // If no stream resolved immediately, open streams view with error notice
+            root.selectedMeta = meta
+            root.showingStreams = true
+            root.isLoadingStreams = false
+            root.streamResults = []
+        }
     }
 
-    function playStream(modelData) {
+    function playDirectStream(modelData) {
         var streamUrl = modelData.url || ""
         if (!streamUrl && modelData.infoHash) {
             streamUrl = "http://127.0.0.1:11470/" + modelData.infoHash + "/" + (modelData.fileIdx || 0)
