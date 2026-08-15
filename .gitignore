@@ -1,0 +1,25 @@
+# Build outputs
+/build/
+/target/
+*.exe
+*.o
+*.obj
+*.a
+*.dll
+*.dll.a
+aqtinstall.log
+
+# Rust
+Cargo.lock
+**/*.rs.bk
+
+# Qt Creator & IDE files
+*.user
+*.user.*
+.vscode/
+.idea/
+
+# OS metadata
+.DS_Store
+Thumbs.db
+desktop.ini
