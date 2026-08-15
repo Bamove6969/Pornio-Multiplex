@@ -9,40 +9,40 @@ Window {
     width: 1600
     height: 900
     visible: true
-    title: "Stremio Multiview 4-Screen"
+    title: "Pornio-Multiplex"
     color: "#000000"
 
     property bool isMaximumMode: false
+    property bool globalFillMode: true
 
     Item {
         anchors.fill: parent
 
-        // 2x2 Viewport Area (Takes 100% full screen real estate in Maximum Mode)
+        // 2x2 Viewport Area (100% full screen real estate, zero bezel, zero gap)
         QuadGrid {
             id: quadGrid
             anchors.fill: parent
-            anchors.topMargin: (mainWindow.isMaximumMode || topBar.opacity === 0) ? 0 : topBar.height
             isMaximumMode: mainWindow.isMaximumMode
             onRequestOpenSearch: (slot) => {
                 searchDialog.openForSlot(slot)
             }
         }
 
-        // Top Control Bar (Collapsible in Maximum Mode, slides down on top-edge hover)
+        // Top Control Bar (Slides down from top edge on hover in Maximum mode)
         Rectangle {
             id: topBar
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
             height: 48
-            color: Qt.rgba(17/255, 17/255, 24/255, 0.95)
+            color: Qt.rgba(14/255, 14/255, 20/255, 0.95)
             border.color: "#1e1e28"
             border.width: 1
             z: 100
 
             visible: opacity > 0
             opacity: (!mainWindow.isMaximumMode || topHoverZone.containsMouse || topBarHover.containsMouse) ? 1.0 : 0.0
-            Behavior on opacity { NumberAnimation { duration: 200 } }
+            Behavior on opacity { NumberAnimation { duration: 180 } }
 
             MouseArea {
                 id: topBarHover
@@ -57,7 +57,7 @@ Window {
                 spacing: 10
 
                 Text {
-                    text: "STREMIO MULTIVIEW"
+                    text: "PORNIO-MULTIPLEX"
                     color: "#7B68EE"
                     font.bold: true
                     font.pixelSize: 14
@@ -68,7 +68,7 @@ Window {
                 }
 
                 Text {
-                    text: "Audio Focus: Slot " + (QuadController.activeAudioSlot + 1) + " (Keys: 1, 2, 3, 4)"
+                    text: "Audio: Slot " + (QuadController.activeAudioSlot + 1) + " (Keys: 1, 2, 3, 4)"
                     color: "#a0a0b8"
                     font.pixelSize: 12
                 }
@@ -97,15 +97,15 @@ Window {
                 }
 
                 Button {
-                    text: "Play/Pause All (Space)"
+                    text: "Play/Pause (Space)"
                     onClicked: (mouse) => { QuadController.togglePlayPauseAll() }
                 }
 
                 Button {
-                    text: mainWindow.isMaximumMode ? "🗗 Standard View (M)" : "⚡ Maximum View (M)"
+                    text: mainWindow.isMaximumMode ? "🗗 Standard (M)" : "⚡ Maximum View (M)"
                     highlighted: mainWindow.isMaximumMode
                     onClicked: (mouse) => {
-                        mainWindow.isMaximumMode = !mainWindow.isMaximumMode
+                        toggleMaximumMode()
                     }
                 }
 
@@ -118,13 +118,13 @@ Window {
             }
         }
 
-        // Top-edge hover trigger for revealing controls in Maximum Mode
+        // Top-edge hover trigger for auto-revealing control bar in Maximum mode
         MouseArea {
             id: topHoverZone
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            height: 10
+            height: 12
             hoverEnabled: true
             acceptedButtons: Qt.NoButton
             z: 99
@@ -134,6 +134,15 @@ Window {
     // Stream Search Modal
     SearchDialog {
         id: searchDialog
+    }
+
+    function toggleMaximumMode() {
+        mainWindow.isMaximumMode = !mainWindow.isMaximumMode
+        if (mainWindow.isMaximumMode) {
+            mainWindow.visibility = Window.FullScreen
+        } else {
+            mainWindow.visibility = Window.Windowed
+        }
     }
 
     // Global Keybindings
@@ -149,11 +158,11 @@ Window {
 
     Shortcut { 
         sequence: "M"
-        onActivated: mainWindow.isMaximumMode = !mainWindow.isMaximumMode 
+        onActivated: toggleMaximumMode()
     }
     Shortcut { 
         sequence: "F10"
-        onActivated: mainWindow.isMaximumMode = !mainWindow.isMaximumMode 
+        onActivated: toggleMaximumMode()
     }
 
     Shortcut { 
@@ -162,7 +171,7 @@ Window {
             if (QuadController.soloSlot !== -1) {
                 QuadController.soloSlot = -1
             } else if (mainWindow.isMaximumMode) {
-                mainWindow.isMaximumMode = false
+                toggleMaximumMode()
             }
         }
     }
