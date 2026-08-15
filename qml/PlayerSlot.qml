@@ -7,9 +7,10 @@ Rectangle {
     id: root
     color: "#0c0c10"
     border.color: isAudioActive ? "#7B68EE" : "#1e1e28"
-    border.width: isAudioActive ? 2 : 1
+    border.width: isMaximumMode ? (isAudioActive ? 1 : 0) : (isAudioActive ? 2 : 1)
 
     property int slotIndex: 0
+    property bool isMaximumMode: false
     property var slotData: ({})
     property bool isAudioActive: QuadController.activeAudioSlot === slotIndex
     property bool isSolo: QuadController.soloSlot === slotIndex
