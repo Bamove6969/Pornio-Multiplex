@@ -40,7 +40,7 @@ QuadController::QuadController(QObject *parent)
       m_activeAudioSlot(0),
       m_soloSlot(-1),
       m_allPaused(false),
-      m_defaultAddonUrl("https://127-0-0-1.local-ip.medicmobile.org:58828/eyJlbmFibGVKYWNrZXR0Ijoib24iLCJqYWNrZXR0VXJsIjoiaHR0cDovL2phY2tldHQ6OTExNyIsImphY2tldHRLZXkiOiJ3N2l5Z3B3d3A5bG14MWNtaXRvNnU0N3NobmNyanRvcyIsImphY2tldHRQdWJsaWNVcmwiOiJodHRwOi8vbG9jYWxob3N0OjkxMTciLCJzZWFyY2hCeVRpdGxlIjoib24iLCJyZWFsRGVicmlkS2V5IjoiSVROSVBVTks2VFhVNUxLVjNLVk4ySEk1VFNTQlZXUVRXQ0NUSlkzVFVaNDZRNDJERktCUSIsInRwZGJBcGlLZXkiOiJ3TjJBQnhnaDlzZkh5ZWJLQ2p2WXgwTmZKYjlDTzBNSmJBZ2pNVklzMzc3MWYzOWUifQ") {
+      m_defaultAddonUrl("https://127-0-0-1.local-ip.medicmobile.org:8828/eyJlbmFibGVKYWNrZXR0Ijoib24iLCJqYWNrZXR0VXJsIjoiaHR0cDovL2phY2tldHQ6OTExNyIsImphY2tldHRLZXkiOiJ3N2l5Z3B3d3A5bG14MWNtaXRvNnU0N3NobmNyanRvcyIsImphY2tldHRQdWJsaWNVcmwiOiJodHRwOi8vbG9jYWxob3N0OjkxMTciLCJzZWFyY2hCeVRpdGxlIjoib24iLCJyZWFsRGVicmlkS2V5IjoiSVROSVBVTks2VFhVNUxLVjNLVk4ySEk1VFNTQlZXUVRXQ0NUSlkzVFVaNDZRNDJERktCUSIsInRwZGJBcGlLZXkiOiJ3TjJBQnhnaDlzZkh5ZWJLQ2p2WXgwTmZKYjlDTzBNSmJBZ2pNVklzMzc3MWYzOWUifQ") {
     
     m_coreHandle = stremio_quad_create();
     updateFromRustState();
