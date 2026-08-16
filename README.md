@@ -2,7 +2,7 @@
 
 > **A native 4-screen hardware-accelerated Stremio multiplexing player built with Qt 6, Rust, and libmpv.**
 
-[![Release](https://img.shields.io/badge/release-v0.1.0--beta-purple.svg)](https://github.com/bamove6969/Pornio-Multiplex/releases)
+[![Release](https://img.shields.io/badge/release-v0.1.0--beta-purple.svg)](https://github.com/Bamove6969/Pornio-Multiplex/releases)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Framework](https://img.shields.io/badge/Qt-6.7.2-brightgreen.svg)](https://qt.io)
 [![Core](https://img.shields.io/badge/Rust-1.80+-orange.svg)](https://www.rust-lang.org)
@@ -64,6 +64,13 @@ Pornio-Multiplex was architected around three non-negotiable engineering princip
    Pornio-Multiplex operates as a completely standalone client. It connects to your existing Stremio backend, indexers, and addons over clean HTTP Stremio Protocol v3 without modifying, overwriting, or altering your existing backend files.
 3. **Memory Safety & Hardware Acceleration**:
    Async networking, JSON marshaling, and state management are isolated within a safe Rust runtime, while video presentation uses native GPU swapchains (`QOpenGLFramebufferObject`).
+
+---
+
+## 👥 Authors & Contributors
+
+* **Bamove6969** ([@Bamove6969](https://github.com/Bamove6969)) — *Creator & Maintainer*
+* **Antigravity** (Google DeepMind) — *Architect & Core Developer*
 
 ---
 
